@@ -7,6 +7,8 @@ namespace CursorKeep
     public partial class Form1 : Form
     {
         private readonly AppController _controller;
+        private readonly ConfigService _configService;
+        private readonly TelegramBotService _telegramService;
         private readonly Icon _iconRunning;
         private readonly Icon _iconStopped;
         private const int MouseMoveIntervalMs = 10_000;
@@ -21,9 +23,28 @@ namespace CursorKeep
             var service = new MouseMoverService(MouseMoveIntervalMs);
             _controller = new AppController(new StartCommand(service), new StopCommand(service));
 
-            btnStart.Enabled = true;
-            btnStop.Enabled = false;
-            ApplyIcon(_iconStopped, "CursorKeep – Stopped");
+            _configService = new ConfigService();
+            _telegramService = new TelegramBotService(
+                _configService,
+                () => _controller.IsMoving,
+                () => { if (IsHandleCreated && !IsDisposed) Invoke(SetRunning); },
+                () => { if (IsHandleCreated && !IsDisposed) Invoke(SetStopped); },
+                action => { if (IsHandleCreated && !IsDisposed) Invoke(action); });
+
+            SetStopped();
+
+            if (!string.IsNullOrWhiteSpace(_configService.BotToken))
+            {
+                bool ok = _telegramService.Start(_configService.BotToken);
+                if (!ok)
+                {
+                    lblTelegramStatus.ForeColor = Color.Red;
+                    lblTelegramStatus.Text = "● Telegram: click ⚙ to reconfigure";
+                    return;
+                }
+            }
+
+            UpdateTelegramStatus();
         }
 
         private static Icon LoadIcon(string filename)
@@ -31,6 +52,22 @@ namespace CursorKeep
             var stream = typeof(Form1).Assembly
                 .GetManifestResourceStream($"CursorKeep.Icons.{filename}")!;
             return new Icon(stream);
+        }
+
+        private void SetRunning()
+        {
+            _controller.Start();
+            btnStart.Enabled = false;
+            btnStop.Enabled = true;
+            ApplyIcon(_iconRunning, "CursorKeep – Running");
+        }
+
+        private void SetStopped()
+        {
+            _controller.Stop();
+            btnStart.Enabled = true;
+            btnStop.Enabled = false;
+            ApplyIcon(_iconStopped, "CursorKeep – Stopped");
         }
 
         private void ApplyIcon(Icon icon, string tooltip)
@@ -41,20 +78,56 @@ namespace CursorKeep
             notifyIcon.Visible = true;
         }
 
-        private void btnStart_Click(object sender, EventArgs e)
+        private void btnStart_Click(object sender, EventArgs e) => SetRunning();
+
+        private void btnStop_Click(object sender, EventArgs e) => SetStopped();
+
+        private async void btnSettings_Click(object sender, EventArgs e)
         {
-            _controller.Start();
-            btnStart.Enabled = false;
-            btnStop.Enabled = true;
-            ApplyIcon(_iconRunning, "CursorKeep – Running");
+            using var dlg = new SettingsDialog(_configService.BotToken);
+            if (dlg.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            var token = dlg.BotToken;
+
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                btnSettings.Enabled = false;
+                btnSettings.Text = "…";
+                bool valid = await TelegramBotService.ValidateTokenAsync(token);
+                btnSettings.Enabled = true;
+                btnSettings.Text = "⚙";
+
+                if (!valid)
+                {
+                    MessageBox.Show("Invalid bot token. Please check and try again.",
+                        "Invalid Token", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            _configService.SaveToken(token);
+
+            if (!string.IsNullOrWhiteSpace(token))
+                _telegramService.Start(token);
+            else
+                _telegramService.Stop();
+
+            UpdateTelegramStatus();
         }
 
-        private void btnStop_Click(object sender, EventArgs e)
+        private void UpdateTelegramStatus()
         {
-            _controller.Stop();
-            btnStart.Enabled = true;
-            btnStop.Enabled = false;
-            ApplyIcon(_iconStopped, "CursorKeep – Stopped");
+            if (_telegramService.IsConnected)
+            {
+                lblTelegramStatus.ForeColor = Color.Green;
+                lblTelegramStatus.Text = "● Telegram: Connected";
+            }
+            else
+            {
+                lblTelegramStatus.ForeColor = Color.Gray;
+                lblTelegramStatus.Text = "● Telegram: Not configured";
+            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -70,6 +143,7 @@ namespace CursorKeep
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
+            _telegramService.Dispose();
             _controller.Stop();
             notifyIcon.Visible = false;
             base.OnFormClosed(e);
@@ -94,11 +168,9 @@ namespace CursorKeep
             stopToolStripMenuItem.Enabled = _controller.IsMoving;
         }
 
-        private void startToolStripMenuItem_Click(object sender, EventArgs e) =>
-            btnStart_Click(btnStart, EventArgs.Empty);
+        private void startToolStripMenuItem_Click(object sender, EventArgs e) => SetRunning();
 
-        private void stopToolStripMenuItem_Click(object sender, EventArgs e) =>
-            btnStop_Click(btnStop, EventArgs.Empty);
+        private void stopToolStripMenuItem_Click(object sender, EventArgs e) => SetStopped();
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {

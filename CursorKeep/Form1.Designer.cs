@@ -32,6 +32,8 @@ partial class Form1
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
         btnStart = new Button();
         btnStop = new Button();
+        btnSettings = new Button();
+        lblTelegramStatus = new Label();
         notifyIcon = new NotifyIcon(components);
         contextMenuStripAutoMove = new ContextMenuStrip(components);
         startToolStripMenuItem = new ToolStripMenuItem();
@@ -56,7 +58,7 @@ partial class Form1
         // btnStop
         // 
         btnStop.BackColor = SystemColors.Control;
-        btnStop.Location = new Point(221, 31);
+        btnStop.Location = new Point(197, 31);
         btnStop.Margin = new Padding(4);
         btnStop.Name = "btnStop";
         btnStop.Size = new Size(118, 36);
@@ -64,6 +66,27 @@ partial class Form1
         btnStop.Text = "Stop";
         btnStop.UseVisualStyleBackColor = false;
         btnStop.Click += btnStop_Click;
+        // 
+        // btnSettings
+        // 
+        btnSettings.Location = new Point(348, 31);
+        btnSettings.Margin = new Padding(4);
+        btnSettings.Name = "btnSettings";
+        btnSettings.Size = new Size(30, 36);
+        btnSettings.TabIndex = 2;
+        btnSettings.Text = "⚙";
+        btnSettings.UseVisualStyleBackColor = true;
+        btnSettings.Click += btnSettings_Click;
+        // 
+        // lblTelegramStatus
+        // 
+        lblTelegramStatus.AutoSize = true;
+        lblTelegramStatus.ForeColor = Color.Gray;
+        lblTelegramStatus.Location = new Point(12, 78);
+        lblTelegramStatus.Name = "lblTelegramStatus";
+        lblTelegramStatus.Size = new Size(229, 25);
+        lblTelegramStatus.TabIndex = 3;
+        lblTelegramStatus.Text = "● Telegram: Not configured";
         // 
         // notifyIcon
         // 
@@ -107,10 +130,11 @@ partial class Form1
         AutoScaleDimensions = new SizeF(10F, 25F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = SystemColors.Control;
-        ClientSize = new Size(390, 94);
+        ClientSize = new Size(390, 108);
         Controls.Add(btnStop);
         Controls.Add(btnStart);
-        Cursor = Cursors.Default;
+        Controls.Add(btnSettings);
+        Controls.Add(lblTelegramStatus);
         FormBorderStyle = FormBorderStyle.Fixed3D;
         Icon = (Icon)resources.GetObject("$this.Icon");
         Margin = new Padding(4);
@@ -124,12 +148,15 @@ partial class Form1
         Resize += From_Resize;
         contextMenuStripAutoMove.ResumeLayout(false);
         ResumeLayout(false);
+        PerformLayout();
     }
 
     #endregion
 
     private Button btnStart;
     private Button btnStop;
+    private Button btnSettings;
+    private Label lblTelegramStatus;
     private NotifyIcon notifyIcon;
     private ToolStripMenuItem startToolStripMenuItem;
     private ToolStripMenuItem stopToolStripMenuItem;
