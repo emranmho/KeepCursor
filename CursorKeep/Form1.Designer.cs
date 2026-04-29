@@ -70,7 +70,7 @@ partial class Form1
         notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
         notifyIcon.ContextMenuStrip = contextMenuStripAutoMove;
         notifyIcon.Icon = (Icon)resources.GetObject("notifyIcon.Icon");
-        notifyIcon.Text = "Auto move";
+        notifyIcon.Text = "CursorKeep";
         notifyIcon.MouseDoubleClick += notifyIcon_MouseDoubleClick;
         // 
         // contextMenuStripAutoMove
@@ -128,7 +128,6 @@ partial class Form1
     private Button btnStart;
     private Button btnStop;
     private NotifyIcon notifyIcon;
-    private ContextMenuStrip contextMenuStrip1;
     private ToolStripMenuItem startToolStripMenuItem;
     private ToolStripMenuItem stopToolStripMenuItem;
     private ToolStripMenuItem exitToolStripMenuItem;

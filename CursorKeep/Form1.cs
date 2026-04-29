@@ -1,42 +1,44 @@
 using CursorKeep.Commands;
-using CursorKeep.Services;
 using CursorKeep.Controllers;
+using CursorKeep.Services;
 
 namespace CursorKeep
 {
     public partial class Form1 : Form
     {
-        private AppController _controller;
-        private readonly HotkeyManager _hotkeyManager;
+        private readonly AppController _controller;
+        private readonly Icon _iconRunning;
+        private readonly Icon _iconStopped;
+        private const int MouseMoveIntervalMs = 10_000;
 
         public Form1()
         {
             InitializeComponent();
-            InitializeApp();
 
-            // Initialize HotkeyManager
-            _hotkeyManager = new HotkeyManager(this.Handle);
-            _hotkeyManager.StartHotkeyPressed += (s, e) => btnStart_Click(btnStart, EventArgs.Empty);
-            _hotkeyManager.StopHotkeyPressed += (s, e) => btnStop_Click(btnStop, EventArgs.Empty);
-            _hotkeyManager.ExitHotkeyPressed += (s, e) => Application.Exit();
-        }
+            _iconRunning = LoadIcon("running.ico");
+            _iconStopped = LoadIcon("stopped.ico");
 
+            var service = new MouseMoverService(MouseMoveIntervalMs);
+            _controller = new AppController(new StartCommand(service), new StopCommand(service));
 
-        private void InitializeApp()
-        {
-            // Initialize the service with a 10-second interval
-            var mouseMoverService = new MouseMoverService(10000);
-
-            // Create commands for start and stop actions
-            var startCommand = new StartCommand(mouseMoverService);
-            var stopCommand = new StopCommand(mouseMoverService);
-
-            // Initialize controller with the commands
-            _controller = new AppController(startCommand, stopCommand);
-
-            // Initialize UI state
             btnStart.Enabled = true;
             btnStop.Enabled = false;
+            ApplyIcon(_iconStopped, "CursorKeep – Stopped");
+        }
+
+        private static Icon LoadIcon(string filename)
+        {
+            var stream = typeof(Form1).Assembly
+                .GetManifestResourceStream($"CursorKeep.Icons.{filename}")!;
+            return new Icon(stream);
+        }
+
+        private void ApplyIcon(Icon icon, string tooltip)
+        {
+            Icon = icon;
+            notifyIcon.Icon = icon;
+            notifyIcon.Text = tooltip;
+            notifyIcon.Visible = true;
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -44,6 +46,7 @@ namespace CursorKeep
             _controller.Start();
             btnStart.Enabled = false;
             btnStop.Enabled = true;
+            ApplyIcon(_iconRunning, "CursorKeep – Running");
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -51,57 +54,55 @@ namespace CursorKeep
             _controller.Stop();
             btnStart.Enabled = true;
             btnStop.Enabled = false;
+            ApplyIcon(_iconStopped, "CursorKeep – Stopped");
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                Hide();
+                return;
+            }
+            base.OnFormClosing(e);
         }
 
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             _controller.Stop();
-            _hotkeyManager.Dispose();
+            notifyIcon.Visible = false;
             base.OnFormClosed(e);
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             Show();
-            this.WindowState = FormWindowState.Normal;
-            notifyIcon.Visible = false;
+            WindowState = FormWindowState.Normal;
+            Activate();
         }
 
         private void From_Resize(object sender, EventArgs e)
         {
-            if (this.WindowState == FormWindowState.Minimized)
-            {
+            if (WindowState == FormWindowState.Minimized)
                 Hide();
-                notifyIcon.Visible = true;
-            }
         }
 
         private void contextMenuStripAutoMove_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (_controller.IsMoving)
-            {
-                startToolStripMenuItem.Enabled = false;
-                stopToolStripMenuItem.Enabled = true;
-            }
-            else
-            {
-                startToolStripMenuItem.Enabled = true;
-                stopToolStripMenuItem.Enabled = false;
-            }
+            startToolStripMenuItem.Enabled = !_controller.IsMoving;
+            stopToolStripMenuItem.Enabled = _controller.IsMoving;
         }
 
-        private void startToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void startToolStripMenuItem_Click(object sender, EventArgs e) =>
             btnStart_Click(btnStart, EventArgs.Empty);
-        }
 
-        private void stopToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void stopToolStripMenuItem_Click(object sender, EventArgs e) =>
             btnStop_Click(btnStop, EventArgs.Empty);
-        }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            notifyIcon.Visible = false;
             Application.Exit();
         }
     }
