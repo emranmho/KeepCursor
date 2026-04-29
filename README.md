@@ -67,8 +67,8 @@ CursorKeep/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/emranmho/AutoMouseAction.git
-   cd AutoMouseAction
+   git clone https://github.com/emranmho/KeepCursor.git
+   cd KeepCursor
    ```
 
 2. **Build and run**
