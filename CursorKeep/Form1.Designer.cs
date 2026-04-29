@@ -45,7 +45,7 @@ partial class Form1
         btnStart.BackColor = SystemColors.Control;
         btnStart.ForeColor = Color.Black;
         btnStart.Location = new Point(56, 31);
-        btnStart.Margin = new Padding(4, 4, 4, 4);
+        btnStart.Margin = new Padding(4);
         btnStart.Name = "btnStart";
         btnStart.Size = new Size(118, 36);
         btnStart.TabIndex = 0;
@@ -57,7 +57,7 @@ partial class Form1
         // 
         btnStop.BackColor = SystemColors.Control;
         btnStop.Location = new Point(221, 31);
-        btnStop.Margin = new Padding(4, 4, 4, 4);
+        btnStop.Margin = new Padding(4);
         btnStop.Name = "btnStop";
         btnStop.Size = new Size(118, 36);
         btnStop.TabIndex = 1;
@@ -110,10 +110,13 @@ partial class Form1
         ClientSize = new Size(390, 94);
         Controls.Add(btnStop);
         Controls.Add(btnStart);
+        Cursor = Cursors.Default;
         FormBorderStyle = FormBorderStyle.Fixed3D;
         Icon = (Icon)resources.GetObject("$this.Icon");
-        Margin = new Padding(4, 4, 4, 4);
+        Margin = new Padding(4);
         MaximizeBox = false;
+        MdiChildrenMinimizedAnchorBottom = false;
+        MinimizeBox = false;
         Name = "Form1";
         SizeGripStyle = SizeGripStyle.Hide;
         StartPosition = FormStartPosition.CenterScreen;
