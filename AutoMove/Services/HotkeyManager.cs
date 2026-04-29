@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoMove.Services
+namespace CursorKeep.Services
 {
     public class HotkeyManager : IMessageFilter, IDisposable
     {

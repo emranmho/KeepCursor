@@ -1,4 +1,4 @@
-namespace AutoMove
+namespace CursorKeep
 {
     internal static class Program
     {

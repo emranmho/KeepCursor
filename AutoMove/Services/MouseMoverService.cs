@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using Timer = System.Windows.Forms.Timer;
 
 
-namespace AutoMove.Services
+namespace CursorKeep.Services
 {
     public class MouseMoverService
     {

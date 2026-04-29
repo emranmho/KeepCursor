@@ -1,11 +1,12 @@
-﻿using AutoMove.Services;
+﻿using CursorKeep.Commands;
+using CursorKeep.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutoMove.Commands
+namespace CursorKeep.Commands
 {
     public class StopCommand : IMoveCommand
     {

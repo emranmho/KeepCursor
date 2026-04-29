@@ -1,8 +1,8 @@
-using AutoMove.Commands;
-using AutoMove.Controllers;
-using AutoMove.Services;
+using CursorKeep.Commands;
+using CursorKeep.Services;
+using CursorKeep.Controllers;
 
-namespace AutoMove
+namespace CursorKeep
 {
     public partial class Form1 : Form
     {
