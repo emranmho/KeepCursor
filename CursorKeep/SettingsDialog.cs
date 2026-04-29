@@ -3,13 +3,15 @@ namespace CursorKeep
     public class SettingsDialog : Form
     {
         private readonly TextBox _txtToken;
+        private readonly CheckBox _chkStartup;
 
         public string BotToken => _txtToken.Text.Trim();
+        public bool RunOnStartup => _chkStartup.Checked;
 
-        public SettingsDialog(string currentToken)
+        public SettingsDialog(string currentToken, bool startupEnabled)
         {
-            Text = "Telegram Settings";
-            ClientSize = new Size(400, 130);
+            Text = "Settings";
+            ClientSize = new Size(400, 165);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             StartPosition = FormStartPosition.CenterParent;
             MaximizeBox = false;
@@ -17,7 +19,7 @@ namespace CursorKeep
 
             var lblToken = new Label
             {
-                Text = "Bot Token:",
+                Text = "Telegram Bot Token:",
                 Location = new Point(16, 16),
                 AutoSize = true
             };
@@ -30,11 +32,19 @@ namespace CursorKeep
                 PlaceholderText = "Paste your Telegram bot token here"
             };
 
+            _chkStartup = new CheckBox
+            {
+                Text = "Run on Windows startup",
+                Location = new Point(16, 80),
+                AutoSize = true,
+                Checked = startupEnabled
+            };
+
             var btnOk = new Button
             {
                 Text = "OK",
                 DialogResult = DialogResult.OK,
-                Location = new Point(224, 82),
+                Location = new Point(224, 118),
                 Size = new Size(75, 30)
             };
 
@@ -42,11 +52,11 @@ namespace CursorKeep
             {
                 Text = "Cancel",
                 DialogResult = DialogResult.Cancel,
-                Location = new Point(309, 82),
+                Location = new Point(309, 118),
                 Size = new Size(75, 30)
             };
 
-            Controls.AddRange([lblToken, _txtToken, btnOk, btnCancel]);
+            Controls.AddRange([lblToken, _txtToken, _chkStartup, btnOk, btnCancel]);
             AcceptButton = btnOk;
             CancelButton = btnCancel;
         }

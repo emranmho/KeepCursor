@@ -86,7 +86,13 @@ namespace CursorKeep.Services
                 return;
 
             if (!_config.AuthorizedChatId.HasValue)
+            {
                 _config.SaveAuthorizedChatId(chatId);
+                await bot.SendMessage(chatId,
+                    "👋 You are now authorized to control CursorKeep.\n\nCommands:\n/start – Start mouse movement\n/stop – Stop mouse movement\n/status – Check current status",
+                    cancellationToken: ct);
+                return;
+            }
 
             var reply = text.Trim().ToLowerInvariant() switch
             {
@@ -107,7 +113,6 @@ namespace CursorKeep.Services
 
         private Task HandleError(ITelegramBotClient bot, Exception ex, HandleErrorSource source, CancellationToken ct)
         {
-            IsConnected = false;
             return Task.CompletedTask;
         }
 

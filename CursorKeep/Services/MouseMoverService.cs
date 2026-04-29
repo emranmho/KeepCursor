@@ -20,7 +20,7 @@ namespace CursorKeep.Services
             _random = new Random();
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void Timer_Tick(object? sender, EventArgs e)
         {
             int x = Cursor.Position.X + _random.Next(-100, 101);
             int y = Cursor.Position.Y + _random.Next(-100, 101);

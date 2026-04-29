@@ -9,6 +9,7 @@ namespace CursorKeep
         private readonly AppController _controller;
         private readonly ConfigService _configService;
         private readonly TelegramBotService _telegramService;
+        private readonly StartupService _startupService;
         private readonly Icon _iconRunning;
         private readonly Icon _iconStopped;
         private const int MouseMoveIntervalMs = 10_000;
@@ -24,6 +25,9 @@ namespace CursorKeep
             _controller = new AppController(new StartCommand(service), new StopCommand(service));
 
             _configService = new ConfigService();
+            _startupService = new StartupService();
+            _startupService.SyncPath(Application.ExecutablePath);
+
             _telegramService = new TelegramBotService(
                 _configService,
                 () => _controller.IsMoving,
@@ -84,7 +88,7 @@ namespace CursorKeep
 
         private async void btnSettings_Click(object sender, EventArgs e)
         {
-            using var dlg = new SettingsDialog(_configService.BotToken);
+            using var dlg = new SettingsDialog(_configService.BotToken, _startupService.IsEnabled());
             if (dlg.ShowDialog(this) != DialogResult.OK)
                 return;
 
@@ -112,6 +116,11 @@ namespace CursorKeep
                 _telegramService.Start(token);
             else
                 _telegramService.Stop();
+
+            if (dlg.RunOnStartup)
+                _startupService.Enable(Application.ExecutablePath);
+            else
+                _startupService.Disable();
 
             UpdateTelegramStatus();
         }
